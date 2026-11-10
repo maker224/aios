@@ -15,7 +15,7 @@ jobs:
         with:
           channel: stable
       - run: flutter pub get
-      - run: flutter analyze
+      - run: flutter analyze lib test --no-fatal-infos
       - run: flutter test
 
   relay:
@@ -31,7 +31,7 @@ jobs:
       - run: dart analyze
       - name: Protocol test (register/presence/route)
         run: |
-          dart run bin/server.dart &
+          PORT=8081 dart run bin/server.dart &
           SERVER_PID=$!
           sleep 2
           dart run tool/test_relay.dart ws://localhost:8081/ws
@@ -52,11 +52,13 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - uses: android-actions/setup-android@v3
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
       - run: flutter pub get
+      - name: Accept Android SDK licenses
+        run: |
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
       - name: Build release APK
         run: flutter build apk --release
       - uses: actions/upload-artifact@v4

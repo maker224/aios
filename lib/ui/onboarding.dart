@@ -220,24 +220,28 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           style: theme.textTheme.bodyMedium,
         ),
         const SizedBox(height: 24),
-        RadioListTile<bool>(
-          value: false,
+        RadioGroup<bool>(
           groupValue: _useRelay,
           onChanged: (v) => setState(() => _useRelay = v ?? false),
-          title: const Text('Wi-Fi only'),
-          subtitle: const Text(
-              'Devices sync when on the same network. Most private option.'),
-          secondary: const Icon(Icons.wifi),
-        ),
-        RadioListTile<bool>(
-          value: true,
-          groupValue: _useRelay,
-          onChanged: (v) => setState(() => _useRelay = v ?? false),
-          title: const Text('Wi-Fi + relay'),
-          subtitle: const Text(
-              'Also sync over the internet via your relay server. '
-              'Still end-to-end encrypted.'),
-          secondary: const Icon(Icons.cloud_outlined),
+          child: Column(
+            children: [
+              RadioListTile<bool>(
+                value: false,
+                title: const Text('Wi-Fi only'),
+                subtitle: const Text(
+                    'Devices sync when on the same network. Most private option.'),
+                secondary: const Icon(Icons.wifi),
+              ),
+              RadioListTile<bool>(
+                value: true,
+                title: const Text('Wi-Fi + relay'),
+                subtitle: const Text(
+                    'Also sync over the internet via your relay server. '
+                    'Still end-to-end encrypted.'),
+                secondary: const Icon(Icons.cloud_outlined),
+              ),
+            ],
+          ),
         ),
         if (_useRelay) ...[
           const SizedBox(height: 8),

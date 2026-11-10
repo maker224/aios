@@ -10,7 +10,7 @@ ThemeData buildTheme(Brightness brightness) {
     colorScheme: scheme,
     scaffoldBackgroundColor:
         brightness == Brightness.dark ? null : scheme.surface,
-    appBarTheme: AppBarTheme(
+    appBarTheme: const AppBarTheme(
       centerTitle: false,
       backgroundColor: Colors.transparent,
       elevation: 0,
