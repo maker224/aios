@@ -171,11 +171,23 @@ The relay can't read your data — it only forwards encrypted envelopes.
 
 ### Relay server (for cross-network sync)
 
+Two interchangeable implementations, same wire protocol:
+
+| Implementation | Run it | Binary |
+| -------------- | ------ | ------ |
+| **Rust** (`server/relay-rust`) | `cargo run --release` | ~2 MB static, `cargo build --release` |
+| **Dart** (`server/relay`) | `dart run bin/server.dart` | `dart compile exe` or the Dockerfile |
+
+The Rust version is the recommended production target: axum + tokio,
+tiny static binary, built and tested by CI (`cargo test` covers
+register/presence/routing). Both serve the same `/ws`, `/health`,
+`/api/state` and `/dashboard` endpoints.
+
 | Host | How |
 | ---- | --- |
-| **Fly.io** | `cd server/relay && flyctl launch && flyctl deploy` (config in `server/relay/fly.toml`), or use the **Deploy relay to Fly.io** GitHub Action after adding a `FLY_API_TOKEN` secret |
+| **Fly.io** | `cd server/relay-rust && flyctl launch && flyctl deploy` (Dockerfile included), or use the **Deploy relay to Fly.io** GitHub Action after adding a `FLY_API_TOKEN` secret |
 | **Render** | New → Blueprint → this repo (config in `render.yaml`, free tier) |
-| **Any VPS** | `docker build -t aios-relay .` from `server/relay`, or run the compiled `bin/relay` behind Caddy/nginx for TLS |
+| **Any VPS** | Run the compiled binary behind Caddy/nginx for TLS |
 | **Home machine** | Run the binary on an always-on Mac/Pi + a Cloudflare tunnel |
 
 Whatever host you pick, put the resulting `wss://…/ws` URL in the app under

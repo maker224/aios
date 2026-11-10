@@ -43,6 +43,22 @@ jobs:
           name: aios-relay-linux-x64
           path: server/relay/bin/relay
 
+  relay-rust:
+    name: Test & build (relay-rust)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: server/relay-rust
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo test
+      - run: cargo build --release
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aios-relay-rust-linux-x64
+          path: server/relay-rust/target/release/aios-relay
+
   apk:
     name: Build Android APK
     runs-on: ubuntu-latest
