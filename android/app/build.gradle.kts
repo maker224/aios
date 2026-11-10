@@ -6,7 +6,9 @@ plugins {
 
 android {
     namespace = "dev.aios.aios"
-    compileSdk = flutter.compileSdkVersion
+    // Compile against API 36: plugins like flutter_plugin_android_lifecycle
+    // (transitive dep of file_picker) require compileSdk 36+.
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
