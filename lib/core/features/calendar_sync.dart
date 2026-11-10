@@ -29,6 +29,17 @@ class CalendarSyncService extends ChangeNotifier {
   final DeviceCalendarPlugin _plugin = DeviceCalendarPlugin();
   String? _calendarId;
   bool permissionGranted = false;
+  bool _disposed = false;
+
+  void _notify() {
+    if (!_disposed) notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
+  }
 
   bool get available => Platform.isAndroid || Platform.isIOS;
   bool get enabled => settings.syncCalendars;
@@ -81,14 +92,14 @@ class CalendarSyncService extends ChangeNotifier {
     if (!available) return;
     if (!await ensurePermission()) {
       activity.add('⚠️', 'Calendar permission denied');
-      notifyListeners();
+      _notify();
       return;
     }
     try {
       final calId = await _ensureCalendar();
       if (calId == null) {
         activity.add('⚠️', 'Could not create AIoS calendar');
-        notifyListeners();
+        _notify();
         return;
       }
       final now = tz.TZDateTime.now(tz.local);
@@ -139,10 +150,10 @@ class CalendarSyncService extends ChangeNotifier {
       _saveMaps(pidMap, ridMap, hashes);
       settings.setLastSync('calendars', DateTime.now());
       activity.add('📅', 'Calendar synced', '${events.length} events');
-      notifyListeners();
+      _notify();
     } catch (e) {
       activity.add('⚠️', 'Calendar sync failed', '$e');
-      notifyListeners();
+      _notify();
     }
   }
 
@@ -192,7 +203,7 @@ class CalendarSyncService extends ChangeNotifier {
         hashes[pid] = hashOf(data);
         _saveMaps(pidMap, ridMap, hashes);
       }
-      notifyListeners();
+      _notify();
     } catch (e) {
       debugPrint('calendar: apply failed: $e');
       activity.add('⚠️', 'Could not write event to device', '$e');
@@ -216,7 +227,7 @@ class CalendarSyncService extends ChangeNotifier {
           _saveMaps(pidMap, ridMap, hashes);
         }
       }
-      notifyListeners();
+      _notify();
     } catch (e) {
       debugPrint('calendar: delete failed: $e');
     }

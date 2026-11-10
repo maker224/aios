@@ -20,6 +20,11 @@ class ClipboardSyncService extends ChangeNotifier {
   Timer? _timer;
   String? _lastText;
   bool _applyingRemote = false;
+  bool _disposed = false;
+
+  void _notify() {
+    if (!_disposed) notifyListeners();
+  }
 
   List<SyncRecord> get history => engine.recordsOf(DataType.clipboard);
 
@@ -57,7 +62,7 @@ class ClipboardSyncService extends ChangeNotifier {
       _lastText = text;
       final preview = text.length > 60 ? '${text.substring(0, 60)}…' : text;
       activity.add('📋', 'Clipboard received', preview);
-      notifyListeners();
+      _notify();
     } catch (_) {
     } finally {
       _applyingRemote = false;
@@ -77,6 +82,7 @@ class ClipboardSyncService extends ChangeNotifier {
 
   @override
   void dispose() {
+    _disposed = true;
     _timer?.cancel();
     super.dispose();
   }

@@ -24,6 +24,17 @@ class ContactSyncService extends ChangeNotifier {
 
   bool available = !Platform.isWindows;
   bool permissionGranted = false;
+  bool _disposed = false;
+
+  void _notify() {
+    if (!_disposed) notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
+  }
 
   bool get enabled => settings.syncContacts;
   int get syncedCount => engine.recordCount(DataType.contact);
@@ -45,6 +56,7 @@ class ContactSyncService extends ChangeNotifier {
       debugPrint('contacts: permission error: $e');
       available = false;
       permissionGranted = false;
+      _notify();
       return false;
     }
   }
@@ -55,7 +67,7 @@ class ContactSyncService extends ChangeNotifier {
     if (!available) return;
     if (!await ensurePermission()) {
       activity.add('⚠️', 'Contact permission denied');
-      notifyListeners();
+      _notify();
       return;
     }
     try {
@@ -101,11 +113,11 @@ class ContactSyncService extends ChangeNotifier {
       _saveMaps(pidMap, ridMap, hashes);
       settings.setLastSync('contacts', DateTime.now());
       activity.add('👥', 'Contacts synced', '${contacts.length} on device');
-      notifyListeners();
+      _notify();
     } catch (e) {
       available = false;
       activity.add('⚠️', 'Contact sync failed', '$e');
-      notifyListeners();
+      _notify();
     }
   }
 
@@ -186,7 +198,7 @@ class ContactSyncService extends ChangeNotifier {
         hashes[newId] = hashOf(data);
         _saveMaps(pidMap, ridMap, hashes);
       }
-      notifyListeners();
+      _notify();
     } catch (e) {
       debugPrint('contacts: apply failed: $e');
       activity.add('⚠️', 'Could not write contact to device', '$e');
@@ -206,7 +218,7 @@ class ContactSyncService extends ChangeNotifier {
         hashes.remove(pid);
         _saveMaps(pidMap, ridMap, hashes);
       }
-      notifyListeners();
+      _notify();
     } catch (e) {
       debugPrint('contacts: delete failed: $e');
     }

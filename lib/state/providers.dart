@@ -10,6 +10,11 @@ import 'package:aios/core/transfers/transfer_manager.dart';
 import 'package:aios/state/settings_controller.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+// NOTE: these are app-lifetime singletons. Dependencies are read (not
+// watched) inside the creators — watching would recreate the service
+// (disposing the old one) every time a dependency notifies, which crashes
+// any async work still running on the old instance.
+
 final settingsProvider =
     ChangeNotifierProvider<SettingsController>((ref) => SettingsController());
 
@@ -28,23 +33,23 @@ final peerStoreProvider = ChangeNotifierProvider<PeerStore>((ref) {
 final connectionManagerProvider =
     ChangeNotifierProvider<ConnectionManager>((ref) {
   return ConnectionManager(
-    ref.watch(settingsProvider),
-    ref.watch(peerStoreProvider),
-    ref.watch(activityProvider),
+    ref.read(settingsProvider),
+    ref.read(peerStoreProvider),
+    ref.read(activityProvider),
   );
 });
 
 /// The discovery service owned by the connection manager.
 final discoveryProvider =
     ChangeNotifierProvider<DiscoveryService>((ref) {
-  return ref.watch(connectionManagerProvider).discovery;
+  return ref.read(connectionManagerProvider).discovery;
 });
 
 final syncEngineProvider = ChangeNotifierProvider<SyncEngine>((ref) {
   final engine = SyncEngine(
-    ref.watch(connectionManagerProvider),
-    ref.watch(settingsProvider),
-    ref.watch(peerStoreProvider),
+    ref.read(connectionManagerProvider),
+    ref.read(settingsProvider),
+    ref.read(peerStoreProvider),
   );
   engine.attach();
   return engine;
@@ -53,9 +58,9 @@ final syncEngineProvider = ChangeNotifierProvider<SyncEngine>((ref) {
 final transferManagerProvider =
     ChangeNotifierProvider<TransferManager>((ref) {
   final t = TransferManager(
-    ref.watch(connectionManagerProvider),
-    ref.watch(settingsProvider),
-    ref.watch(activityProvider),
+    ref.read(connectionManagerProvider),
+    ref.read(settingsProvider),
+    ref.read(activityProvider),
   );
   t.attach();
   return t;
@@ -64,9 +69,9 @@ final transferManagerProvider =
 final clipboardProvider =
     ChangeNotifierProvider<ClipboardSyncService>((ref) {
   final c = ClipboardSyncService(
-    ref.watch(syncEngineProvider),
-    ref.watch(settingsProvider),
-    ref.watch(activityProvider),
+    ref.read(syncEngineProvider),
+    ref.read(settingsProvider),
+    ref.read(activityProvider),
   );
   c.register();
   c.start();
@@ -76,9 +81,9 @@ final clipboardProvider =
 final contactSyncProvider =
     ChangeNotifierProvider<ContactSyncService>((ref) {
   final c = ContactSyncService(
-    ref.watch(syncEngineProvider),
-    ref.watch(settingsProvider),
-    ref.watch(activityProvider),
+    ref.read(syncEngineProvider),
+    ref.read(settingsProvider),
+    ref.read(activityProvider),
   );
   c.register();
   return c;
@@ -87,9 +92,9 @@ final contactSyncProvider =
 final calendarSyncProvider =
     ChangeNotifierProvider<CalendarSyncService>((ref) {
   final c = CalendarSyncService(
-    ref.watch(syncEngineProvider),
-    ref.watch(settingsProvider),
-    ref.watch(activityProvider),
+    ref.read(syncEngineProvider),
+    ref.read(settingsProvider),
+    ref.read(activityProvider),
   );
   c.register();
   return c;
@@ -97,8 +102,8 @@ final calendarSyncProvider =
 
 final photoSyncProvider = ChangeNotifierProvider<PhotoSyncService>((ref) {
   return PhotoSyncService(
-    ref.watch(transferManagerProvider),
-    ref.watch(settingsProvider),
-    ref.watch(connectionManagerProvider),
+    ref.read(transferManagerProvider),
+    ref.read(settingsProvider),
+    ref.read(connectionManagerProvider),
   );
 });
