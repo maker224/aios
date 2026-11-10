@@ -1,0 +1,7 @@
+name: aios_relay
+description: AIoS cloud relay — forwards encrypted sync traffic between devices in the same group. Zero dependencies (dart:io only).
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
