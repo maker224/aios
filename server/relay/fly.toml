@@ -1,0 +1,26 @@
+# Fly.io configuration for the AIoS relay.
+# One-time setup:
+#   brew install flyctl && flyctl auth signup
+#   flyctl launch   (from this directory — creates the app on Fly.io)
+# Deploy:
+#   flyctl deploy   (or use the GitHub Action: "Deploy relay to Fly.io")
+
+app = "aios-relay"
+primary_region = "ams"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+  [[http_service.checks]]
+    grace_period = "10s"
+    interval = "30s"
+    method = "GET"
+    timeout = "5s"
+    path = "/health"

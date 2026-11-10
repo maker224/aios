@@ -167,6 +167,36 @@ The relay can't read your data — it only forwards encrypted envelopes.
 
 ---
 
+## Deploying
+
+### Relay server (for cross-network sync)
+
+| Host | How |
+| ---- | --- |
+| **Fly.io** | `cd server/relay && flyctl launch && flyctl deploy` (config in `server/relay/fly.toml`), or use the **Deploy relay to Fly.io** GitHub Action after adding a `FLY_API_TOKEN` secret |
+| **Render** | New → Blueprint → this repo (config in `render.yaml`, free tier) |
+| **Any VPS** | `docker build -t aios-relay .` from `server/relay`, or run the compiled `bin/relay` behind Caddy/nginx for TLS |
+| **Home machine** | Run the binary on an always-on Mac/Pi + a Cloudflare tunnel |
+
+Whatever host you pick, put the resulting `wss://…/ws` URL in the app under
+**Options → How devices connect**, with the same **sync group id** on every
+device.
+
+### App builds
+
+```bash
+flutter build apk --release      # Android (also built by CI on every push)
+flutter build macos --release    # macOS
+flutter build windows --release  # Windows (must run on Windows)
+flutter build ipa                # iOS (needs an Apple Developer account)
+```
+
+GitHub Actions (`.github/workflows/ci.yml`) runs `flutter analyze`, tests,
+relay protocol tests + binary compile, and builds the Android APK as an
+artifact on every push to `main`.
+
+---
+
 ## Roadmap ideas
 
 - [ ] mDNS (Bonjour/NSD) discovery alongside UDP broadcast

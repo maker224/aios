@@ -1,0 +1,11 @@
+# Render.com blueprint — deploys the AIoS relay as a free web service.
+# Push this repo to GitHub, then on Render: New → Blueprint → pick the repo.
+
+services:
+  - type: web
+    name: aios-relay
+    runtime: docker
+    rootDir: server/relay
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /health

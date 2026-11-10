@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  flutter:
+    name: Analyze & test (app)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test
+
+  relay:
+    name: Analyze & test (relay)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: server/relay
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
+      - run: dart pub get
+      - run: dart analyze
+      - name: Protocol test (register/presence/route)
+        run: |
+          dart run bin/server.dart &
+          SERVER_PID=$!
+          sleep 2
+          dart run tool/test_relay.dart ws://localhost:8081/ws
+          kill $SERVER_PID || true
+      - name: Compile standalone binary
+        run: dart compile exe bin/server.dart -o bin/relay
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aios-relay-linux-x64
+          path: server/relay/bin/relay
+
+  apk:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - run: flutter pub get
+      - name: Build release APK
+        run: flutter build apk --release
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aios-android-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
