@@ -109,11 +109,9 @@ class _FilesTabState extends ConsumerState<_FilesTab> {
       online: (p) => manager.reachable(p.id),
     );
     if (peerId == null || !mounted) return;
-    final result = await FilePicker.platform
-        .pickFiles(allowMultiple: true, type: FileType.any);
-    if (result == null) return;
+    final picked = await FilePicker.pickFiles(type: FileType.any);
     final files = [
-      for (final f in result.files)
+      for (final f in picked)
         if (f.path != null) File(f.path!),
     ];
     if (files.isEmpty) return;
@@ -296,11 +294,9 @@ class _PhotosTabState extends ConsumerState<_PhotosTab> {
       title: 'Send photos to device',
     );
     if (peerId == null) return;
-    final result = await FilePicker.platform
-        .pickFiles(allowMultiple: true, type: FileType.image);
-    if (result == null) return;
+    final picked = await FilePicker.pickFiles(type: FileType.image);
     final files = [
-      for (final f in result.files)
+      for (final f in picked)
         if (f.path != null) File(f.path!),
     ];
     if (files.isEmpty) return;
